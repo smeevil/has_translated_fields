@@ -61,7 +61,7 @@ module HasTranslatedFields
                 end
               end
               if chosen_translation
-                chosen_translation.metaclass.send(:include, LocalizedString)
+                chosen_translation.singleton_class.send(:include, LocalizedString)
                 chosen_translation.locale = chosen_locale
                 chosen_translation.fallback = (chosen_locale != ::I18n.locale)
               end
@@ -100,7 +100,7 @@ module HasTranslatedFields
           possible_locales = [locale, ::I18n.default_locale, ::I18n.available_locales].flatten.uniq
           possible_locales.each do |possible_locale|
             next unless translation = super(possible_locale, key, scope, options)
-            translation.metaclass.send(:include, LocalizedString)
+            translation.singleton_class.send(:include, LocalizedString)
             translation.locale = possible_locale
             translation.fallback = (possible_locale != locale)
             return translation
