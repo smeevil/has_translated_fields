@@ -1,0 +1,1 @@
+require 'has_translated_fields'
