@@ -1,0 +1,75 @@
+= Has translated fields
+
+Rails 2.3.x plugin extracted from real projects that make I18n a lot less painful.
+
+* Define which ActiveRecord attributes are translated, define one in a migration and new translations get added seamlessly and automatically.
+* Translated attributes auto-pick the translated version in order or precedence: I18n.locale, I18n.default_locale, any other available locale.
+* I18n::Backend::Simple is extended with AnyTranslation, which returns a translation in the same order of precedence as the ActiveRecord translated attributes.
+
+== Examples
+
+  TODO: ActiveRecord class example
+
+  TODO: View example
+
+  TODO: Metadata example
+
+== How to install
+
+  script/plugin install git://github.com/smeevil/has_translated_fields.git
+
+== Assumptions
+
+* You use Rails 2.3.x and ActiveRecord.
+* You use the default I18n locale backend (Simple)
+* You have sanitized your I18n.available_locales by only including translations for languages you care about
+
+== Sanitizing I18n.available_locales
+
+We have a config/locales directory structure that looks like this:
+
+* config
+  * locales
+    * my_project
+      * nl.yml
+      * en.yml
+      * de.yml
+    * rails-i18n
+      * nl.yml
+      * en.yml
+      * de.yml
+      * es.yml
+      * ...
+    * rails
+      * nl.yml
+      * en.yml
+      * de.yml
+    * other
+      * ...
+
+The my_project directory is usually named after the project. rails-i18n is a copy of svenfuchs' rails-i18n project's locales files. rails contains ActiveRecord model and attribute names and such. other can be any numer of directories, depending on your use.
+The convention we use is that the translations available in the my_project directory is what determines the available locales.
+
+Do something like this in config/environment.rb's config block:
+
+  # Check all translations defined specifically for current the project to determine which locales are used
+  used_locales = Dir[Rails.root.join("config", "locales", "my_project", "*.{rb,yml}")].map{|file| File.basename(file).gsub(File.extname(file),"")}.uniq
+
+  # Find all translations available and select only those which match the locales we actually use
+  config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '*', '*.{rb,yml}')].select{|file| used_locales.include? File.basename(file).gsub(File.extname(file),'')}
+
+  # We're from the Netherlands, our clients are from the Netherlands, so Dutch is our default locale.
+  config.i18n.default_locale = :nl
+  config.after_initialize do
+    # Always put the default locale as first available locale
+    I18n.available_locales = [I18n.default_locale, I18n.available_locales].flatten.uniq
+  end
+
+== Credits
+
+* Gerard 'smeevil' de Brieder (smeevil@me.com)
+* Wes 'narnach' Oldenbeuving (narnach@gmail.com)
+
+== License
+
+MIT LICENSE
